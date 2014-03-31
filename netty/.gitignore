@@ -1,0 +1,13 @@
+target
+.project
+.classpath
+.settings
+*.iml
+/.idea/
+bin
+logs
+test-output
+.gradle
+classes
+build
+gradle.properties
