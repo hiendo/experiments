@@ -28,10 +28,11 @@ public class HttpProxyServerChannelHandler extends ChannelInboundHandlerAdapter 
         Bootstrap b = new Bootstrap();
         b.group(proxyServerChannel.eventLoop()).channel(ctx.channel().getClass())
                 .handler(new HttpTargetServerChannelInitializer(proxyServerChannel))
-                .option(ChannelOption.AUTO_READ, false);
+                .option(ChannelOption.AUTO_READ, false)
+                .option(ChannelOption.SO_KEEPALIVE, true);
 
         //ChannelFuture targetServerChannelFuture = b.connect("localhost", 8888);
-        ChannelFuture targetServerChannelFuture = b.connect("google.com", 80);
+                ChannelFuture targetServerChannelFuture = b.connect("google.com", 80);
 
         targetServerChannel = targetServerChannelFuture.channel();
         targetServerChannelFuture.addListener(new ChannelFutureListener() {

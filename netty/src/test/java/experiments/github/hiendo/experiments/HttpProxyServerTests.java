@@ -40,7 +40,7 @@ public class HttpProxyServerTests {
     @Test
     public void canBeProxied() throws Exception {
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.property(ClientProperties.ASYNC_THREADPOOL_SIZE, "5");
+        //clientConfig.property(ClientProperties.ASYNC_THREADPOOL_SIZE, "5");
         Client client = ClientBuilder.newClient(clientConfig);
         WebTarget webTarget = client.target("http://localhost:8080");
 
