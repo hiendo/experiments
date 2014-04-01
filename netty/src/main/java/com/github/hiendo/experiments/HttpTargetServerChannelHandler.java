@@ -12,10 +12,10 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  */
 public class HttpTargetServerChannelHandler extends ChannelInboundHandlerAdapter {
 
-    private final Channel inboundChannel;
+    private final Channel proxyServerChannel;
 
-    public HttpTargetServerChannelHandler(Channel inboundChannel) {
-        this.inboundChannel = inboundChannel;
+    public HttpTargetServerChannelHandler(Channel proxyServerChannel) {
+        this.proxyServerChannel = proxyServerChannel;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class HttpTargetServerChannelHandler extends ChannelInboundHandlerAdapter
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-        inboundChannel.writeAndFlush(msg).addListener(new ChannelFutureListener() {
+        proxyServerChannel.write(msg).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
@@ -39,8 +39,14 @@ public class HttpTargetServerChannelHandler extends ChannelInboundHandlerAdapter
     }
 
     @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        ctx.flush();
+        proxyServerChannel.flush();
+    }
+
+    @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        HttpProxyServerChannelHandler.closeOnFlush(inboundChannel);
+        HttpProxyServerChannelHandler.closeOnFlush(proxyServerChannel);
     }
 
     @Override

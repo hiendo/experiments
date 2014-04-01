@@ -8,27 +8,28 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.HttpRequest;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class HttpProxyServerChannelHandler extends ChannelInboundHandlerAdapter {
+    final static Logger logger = LoggerFactory.getLogger(HttpProxyServerChannelHandler.class);
 
     private volatile Channel targetServerChannel;
-    private List<Object> messages = new ArrayList<>();
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    public void channelActive(final ChannelHandlerContext ctx) throws Exception {
         final Channel proxyServerChannel = ctx.channel();
         // Connect to target server
         Bootstrap b = new Bootstrap();
         b.group(proxyServerChannel.eventLoop()).channel(ctx.channel().getClass())
                 .handler(new HttpTargetServerChannelInitializer(proxyServerChannel))
                 .option(ChannelOption.AUTO_READ, false);
+
         //ChannelFuture targetServerChannelFuture = b.connect("localhost", 8888);
         ChannelFuture targetServerChannelFuture = b.connect("google.com", 80);
 
@@ -37,13 +38,8 @@ public class HttpProxyServerChannelHandler extends ChannelInboundHandlerAdapter 
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
-                    synchronized (messages) {
-                        for (Object object : messages) {
-                            targetServerChannel.writeAndFlush(object);
-                        }
-                        messages.clear();
-                    }
-                    // proxyServerChannel.read();
+                    logger.info("Channel is now proxied to target channel");
+                    proxyServerChannel.read();
                 } else {
                     // Close the connection if the connection attempt has failed.
                     proxyServerChannel.close();
@@ -53,7 +49,8 @@ public class HttpProxyServerChannelHandler extends ChannelInboundHandlerAdapter 
     }
 
     @Override
-    public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
+    public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
+        logger.info("Reading in HttpProxyServerChannelHandler");
         boolean auth = true;
         if (msg instanceof HttpRequest) {
             HttpRequest request = (HttpRequest) msg;
@@ -65,18 +62,25 @@ public class HttpProxyServerChannelHandler extends ChannelInboundHandlerAdapter 
             }
         }
 
-        final Channel proxyServerChannel = ctx.channel();
         if (!auth) {
             // @todo write http response with unauthorized
-            proxyServerChannel.close();
-        } else {
-            synchronized (messages) {
-                if (!targetServerChannel.isActive() || !messages.isEmpty()) {
-                    messages.add(msg);
-                } else {
-                    targetServerChannel.writeAndFlush(msg);
+            ctx.channel().close();
+            return;
+        }
+
+
+        if (targetServerChannel.isActive()) {
+            logger.info("Writing in HttpProxyServerChannelHandler");
+            targetServerChannel.write(msg).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    if (future.isSuccess()) {
+                        ctx.channel().read();
+                    } else {
+                        future.channel().close();
+                    }
                 }
-            }
+            });
         }
     }
 
@@ -90,6 +94,7 @@ public class HttpProxyServerChannelHandler extends ChannelInboundHandlerAdapter 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         ctx.flush();
+        targetServerChannel.flush();
     }
 
     @Override

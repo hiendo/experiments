@@ -14,10 +14,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
-import java.net.SocketException;
-
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 
 public class HttpProxyServerTests {
 
