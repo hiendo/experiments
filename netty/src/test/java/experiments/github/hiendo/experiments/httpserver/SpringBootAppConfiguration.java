@@ -1,8 +1,5 @@
 package experiments.github.hiendo.experiments.httpserver;
 
-import org.apache.catalina.Context;
-import org.apache.tomcat.JarScanner;
-import org.apache.tomcat.JarScannerCallback;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -26,14 +23,10 @@ import org.springframework.boot.autoconfigure.web.EmbeddedServletContainerAutoCo
 import org.springframework.boot.autoconfigure.web.MultipartAutoConfiguration;
 import org.springframework.boot.autoconfigure.websocket.WebSocketAutoConfiguration;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
-import org.springframework.boot.context.embedded.tomcat.TomcatContextCustomizer;
-import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
+import org.springframework.boot.context.embedded.jetty.JettyEmbeddedServletContainerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-
-import javax.servlet.ServletContext;
-import java.util.Set;
 
 
 @Configuration
@@ -53,21 +46,8 @@ public class SpringBootAppConfiguration {
 
     @Bean
     public EmbeddedServletContainerFactory servletContainer() {
-        TomcatEmbeddedServletContainerFactory embeddedServletContainerFactory =
-                new TomcatEmbeddedServletContainerFactory(8888);
-
-        embeddedServletContainerFactory.addContextCustomizers(new TomcatContextCustomizer() {
-            @Override
-            public void customize(Context context) {
-                context.setJarScanner(new JarScanner() {
-                    @Override
-                    public void scan(ServletContext context, ClassLoader classloader, JarScannerCallback callback,
-                            Set<String> jarsToSkip) {
-                        // Don't do any tomcat's jar scanning to make startup a little bit faster
-                    }
-                });
-            }
-        });
+        JettyEmbeddedServletContainerFactory embeddedServletContainerFactory =
+                new JettyEmbeddedServletContainerFactory(8888);
 
         return embeddedServletContainerFactory;
     }

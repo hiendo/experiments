@@ -32,6 +32,9 @@ configurations {
     // We will use log4j through-out.  Spring boot loads logback by default.
     all*.exclude group: 'commons-logging'
     all*.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+
+    // We're using jetty instead
+    all*.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
 }
 
 dependencies {
@@ -56,6 +59,7 @@ dependencies {
     // Spring Boot
     compile "org.springframework.boot:spring-boot-starter:${springBootVersion}"
     compile "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    compile("org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}")
 }
 
 test {

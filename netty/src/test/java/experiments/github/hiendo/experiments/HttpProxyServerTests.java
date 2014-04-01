@@ -3,12 +3,10 @@ package experiments.github.hiendo.experiments;
 import com.github.hiendo.experiments.HttpProxyServer;
 import experiments.github.hiendo.experiments.httpserver.SpringBootAppConfiguration;
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.ClientProperties;
 import org.hamcrest.core.StringContains;
 import org.springframework.boot.SpringApplication;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.ProcessingException;
@@ -22,7 +20,7 @@ public class HttpProxyServerTests {
 
     private HttpProxyServer httpProxyServer;
 
-    @BeforeMethod(alwaysRun = true)
+    @BeforeSuite(alwaysRun = true)
     public void beforeMethod() throws Exception {
         httpProxyServer = new HttpProxyServer(8080);
         httpProxyServer.start();
@@ -31,7 +29,7 @@ public class HttpProxyServerTests {
         app.run();
     }
 
-    @AfterMethod(alwaysRun = true)
+    @BeforeSuite(alwaysRun = true)
     public void afterMethod() throws Exception {
         if (httpProxyServer != null) {
             httpProxyServer.stop();
@@ -41,7 +39,6 @@ public class HttpProxyServerTests {
     @Test
     public void canBeProxied() throws Exception {
         ClientConfig clientConfig = new ClientConfig();
-        //clientConfig.property(ClientProperties.ASYNC_THREADPOOL_SIZE, "5");
         Client client = ClientBuilder.newClient(clientConfig);
         WebTarget webTarget = client.target("http://localhost:8080");
 
