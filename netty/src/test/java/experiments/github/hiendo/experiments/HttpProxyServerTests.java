@@ -1,9 +1,11 @@
 package experiments.github.hiendo.experiments;
 
 import com.github.hiendo.experiments.HttpProxyServer;
+import experiments.github.hiendo.experiments.httpserver.SpringBootAppConfiguration;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.hamcrest.core.StringContains;
+import org.springframework.boot.SpringApplication;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -25,9 +27,8 @@ public class HttpProxyServerTests {
         httpProxyServer = new HttpProxyServer(8080);
         httpProxyServer.start();
 
-        /**
-         * @todo: create http server here so we don't depend on google.com
-         */
+        SpringApplication app = new SpringApplication(SpringBootAppConfiguration.class);
+        app.run();
     }
 
     @AfterMethod(alwaysRun = true)
@@ -45,7 +46,7 @@ public class HttpProxyServerTests {
         WebTarget webTarget = client.target("http://localhost:8080");
 
         String response = webTarget.request().header("authCode", "validated").get(String.class);
-        assertThat("response", response, StringContains.containsString("Google Search"));
+        assertThat("response", response, StringContains.containsString("Hello World"));
 
         try {
             webTarget.request().get(String.class);
