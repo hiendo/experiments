@@ -24,6 +24,11 @@ public class HttpProxyServerChannelHandler extends ChannelInboundHandlerAdapter 
     @Override
     public void channelActive(final ChannelHandlerContext ctx) throws Exception {
         final Channel proxyServerChannel = ctx.channel();
+        if (targetServerChannel != null) {
+            proxyServerChannel.read();
+            return;
+        }
+
         // Connect to target server
         Bootstrap b = new Bootstrap();
         b.group(proxyServerChannel.eventLoop()).channel(ctx.channel().getClass())
@@ -51,24 +56,6 @@ public class HttpProxyServerChannelHandler extends ChannelInboundHandlerAdapter 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
         logger.info("Reading in HttpProxyServerChannelHandler");
-        boolean auth = true;
-        if (msg instanceof HttpRequest) {
-            HttpRequest request = (HttpRequest) msg;
-
-            // @todo perform real authentication here
-            String authCode = request.headers().get("authCode");
-            if (authCode == null || !authCode.equals("validated")) {
-                auth = false;
-            }
-        }
-
-        if (!auth) {
-            // @todo write http response with unauthorized
-            ctx.channel().close();
-            return;
-        }
-
-
         if (targetServerChannel.isActive()) {
             logger.info("Writing in HttpProxyServerChannelHandler");
             targetServerChannel.write(msg).addListener(new ChannelFutureListener() {

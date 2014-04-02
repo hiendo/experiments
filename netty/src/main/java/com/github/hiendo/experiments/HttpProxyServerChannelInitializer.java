@@ -20,6 +20,7 @@ public class HttpProxyServerChannelInitializer extends ChannelInitializer<Socket
         ch.pipeline().addLast(
                 new LoggingHandler(LogLevel.DEBUG),
                 new HttpRequestDecoder(),
+                new HttpProxyServerAuthHandler(),
                 new HttpProxyServerChannelHandler());
     }
 }
