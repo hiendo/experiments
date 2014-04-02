@@ -55,6 +55,8 @@ dependencies {
     // Jersey
     testCompile "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
     testCompile "org.glassfish.jersey.core:jersey-client:${jerseyClientVersion}"
+    testCompile "org.glassfish.jersey.connectors:jersey-apache-connector:${jerseyClientVersion}"
+
 
     // Spring Boot
     compile "org.springframework.boot:spring-boot-starter:${springBootVersion}"

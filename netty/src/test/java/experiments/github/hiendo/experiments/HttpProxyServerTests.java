@@ -2,10 +2,12 @@ package experiments.github.hiendo.experiments;
 
 import com.github.hiendo.experiments.HttpProxyServer;
 import experiments.github.hiendo.experiments.httpserver.SpringBootAppConfiguration;
+import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.hamcrest.core.StringContains;
 import org.springframework.boot.SpringApplication;
 import org.testng.Assert;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
@@ -29,7 +31,7 @@ public class HttpProxyServerTests {
         app.run();
     }
 
-    @BeforeSuite(alwaysRun = true)
+    @AfterSuite(alwaysRun = true)
     public void afterMethod() throws Exception {
         if (httpProxyServer != null) {
             httpProxyServer.stop();
@@ -38,11 +40,14 @@ public class HttpProxyServerTests {
 
     @Test
     public void canBeProxied() throws Exception {
-        ClientConfig clientConfig = new ClientConfig();
+        ClientConfig clientConfig = new ClientConfig().connectorProvider(new ApacheConnectorProvider());
         Client client = ClientBuilder.newClient(clientConfig);
         WebTarget webTarget = client.target("http://localhost:8080");
 
         String response = webTarget.request().header("authCode", "validated").get(String.class);
+        assertThat("response", response, StringContains.containsString("Hello World"));
+
+        response = webTarget.request().header("authCode", "validated").get(String.class);
         assertThat("response", response, StringContains.containsString("Hello World"));
 
         try {
