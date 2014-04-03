@@ -20,7 +20,7 @@ public class SourceServerChannelInitializer extends ChannelInitializer<SocketCha
                 //new LoggingHandler(LogLevel.DEBUG),
                 new HttpRequestDecoder(),
                 new HttpObjectAggregator(900000),
-                new BasicAuthHandler(),
+                new SessionValidationHandler(),
                 new SourceServerChannelHandler());
     }
 }

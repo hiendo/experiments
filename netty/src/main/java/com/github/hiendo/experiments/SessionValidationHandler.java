@@ -16,8 +16,8 @@ import java.util.concurrent.Callable;
 /**
  *
  */
-public class BasicAuthHandler extends ChannelInboundHandlerAdapter {
-    final static Logger logger = LoggerFactory.getLogger(BasicAuthHandler.class);
+public class SessionValidationHandler extends ChannelInboundHandlerAdapter {
+    final static Logger logger = LoggerFactory.getLogger(SessionValidationHandler.class);
     final static Set<String> validatedSession = new HashSet<>();
     private EventExecutorGroup executorGroup = new DefaultEventExecutorGroup(10);
 

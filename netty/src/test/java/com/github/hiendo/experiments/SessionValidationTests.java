@@ -17,7 +17,7 @@ import javax.ws.rs.client.WebTarget;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class HttpProxyServerTests {
+public class SessionValidationTests {
 
     private HttpProxyServer httpProxyServer;
 
@@ -38,7 +38,7 @@ public class HttpProxyServerTests {
     }
 
     @Test
-    public void canBeProxied() throws Exception {
+    public void validSessionCanBeProxied() throws Exception {
         ClientConfig clientConfig = new ClientConfig().connectorProvider(new ApacheConnectorProvider());
         Client client = ClientBuilder.newClient(clientConfig);
         WebTarget webTarget = client.target("http://localhost:8080");
@@ -52,7 +52,7 @@ public class HttpProxyServerTests {
 
 
     @Test
-    public void cannotBeProxiedIfAuthorizationFails() throws Exception {
+    public void invalidSessionShouldNotBeProxied() throws Exception {
         ClientConfig clientConfig = new ClientConfig().connectorProvider(new ApacheConnectorProvider());
         Client client = ClientBuilder.newClient(clientConfig);
         WebTarget webTarget = client.target("http://localhost:8080");
