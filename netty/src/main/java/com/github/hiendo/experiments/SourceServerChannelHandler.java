@@ -8,31 +8,24 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  */
-public class HttpProxyServerChannelHandler extends ChannelInboundHandlerAdapter {
-    final static Logger logger = LoggerFactory.getLogger(HttpProxyServerChannelHandler.class);
+public class SourceServerChannelHandler extends ChannelInboundHandlerAdapter {
+    final static Logger logger = LoggerFactory.getLogger(SourceServerChannelHandler.class);
 
     private volatile Channel targetServerChannel;
 
     @Override
     public void channelActive(final ChannelHandlerContext ctx) throws Exception {
         final Channel proxyServerChannel = ctx.channel();
-        if (targetServerChannel != null) {
-            proxyServerChannel.read();
-            return;
-        }
-
         // Connect to target server
         Bootstrap b = new Bootstrap();
         b.group(proxyServerChannel.eventLoop()).channel(ctx.channel().getClass())
-                .handler(new HttpTargetServerChannelInitializer(proxyServerChannel))
+                .handler(new TargetServerChannelInitializer(proxyServerChannel))
                 .option(ChannelOption.AUTO_READ, false)
                 .option(ChannelOption.SO_KEEPALIVE, true);
 
@@ -58,7 +51,7 @@ public class HttpProxyServerChannelHandler extends ChannelInboundHandlerAdapter 
         logger.info("Reading in HttpProxyServerChannelHandler");
         if (targetServerChannel.isActive()) {
             logger.info("Writing in HttpProxyServerChannelHandler");
-            targetServerChannel.write(msg).addListener(new ChannelFutureListener() {
+            targetServerChannel.writeAndFlush(msg).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
                     if (future.isSuccess()) {
@@ -80,13 +73,12 @@ public class HttpProxyServerChannelHandler extends ChannelInboundHandlerAdapter 
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ctx.flush();
         targetServerChannel.flush();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
+        logger.error("Error in proxy server handling", cause);
         ctx.close();
     }
 

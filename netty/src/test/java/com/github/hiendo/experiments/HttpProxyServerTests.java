@@ -1,7 +1,6 @@
-package experiments.github.hiendo.experiments;
+package com.github.hiendo.experiments;
 
-import com.github.hiendo.experiments.HttpProxyServer;
-import experiments.github.hiendo.experiments.httpserver.SpringBootAppConfiguration;
+import com.github.hiendo.experiments.httpserver.SpringBootAppConfiguration;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.hamcrest.core.StringContains;
@@ -44,15 +43,29 @@ public class HttpProxyServerTests {
         Client client = ClientBuilder.newClient(clientConfig);
         WebTarget webTarget = client.target("http://localhost:8080");
 
-        String response = webTarget.request().header("authCode", "validated").get(String.class);
+        String response = webTarget.request().header("Authorization", "secret").get(String.class);
         assertThat("response", response, StringContains.containsString("Hello World"));
 
-        response = webTarget.request().header("authCode", "validated").get(String.class);
+        response = webTarget.request().header("Authorization", "secret").get(String.class);
         assertThat("response", response, StringContains.containsString("Hello World"));
+    }
+
+
+    @Test
+    public void cannotBeProxiedIfAuthorizationFails() throws Exception {
+        ClientConfig clientConfig = new ClientConfig().connectorProvider(new ApacheConnectorProvider());
+        Client client = ClientBuilder.newClient(clientConfig);
+        WebTarget webTarget = client.target("http://localhost:8080");
 
         try {
-            webTarget.request().get(String.class);
+            webTarget.request().header("Authorization", "badsecret").get(String.class);
             Assert.fail("Expected error");
         } catch (ProcessingException e) {}
+
+        try {
+            webTarget.request().header("NoAuthorizationHeader", "blank").get(String.class);
+            Assert.fail("Expected error");
+        } catch (ProcessingException e) {}
+
     }
 }

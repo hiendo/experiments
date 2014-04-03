@@ -1,4 +1,4 @@
-package experiments.github.hiendo.experiments.httpserver;
+package com.github.hiendo.experiments.httpserver;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;

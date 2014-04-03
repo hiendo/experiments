@@ -23,7 +23,7 @@ public class HttpProxyServer {
         workerGroup = new NioEventLoopGroup();
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                .childHandler(new HttpProxyServerChannelInitializer())
+                .childHandler(new SourceServerChannelInitializer())
                 .childOption(ChannelOption.AUTO_READ, false)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
